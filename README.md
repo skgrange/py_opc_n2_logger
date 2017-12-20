@@ -24,6 +24,13 @@ dmesg | grep tty
 # Add user to the dialout group, change user_name
 # sudo adduser user_name dialout
 ```
+
+  4. Run logging programme: 
+  
+```
+# Start logging
+alphasense_opc_n2_logger
+```
   
 ## To-do 
  
