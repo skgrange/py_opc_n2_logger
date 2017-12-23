@@ -1,70 +1,82 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+'''
+A simple Python programme. 
+
+Author Stuart K. Grange 
+'''
+
 # Load packages
 import usbiss
 import opc
 import time, datetime, pytz
 import csv
 from collections import OrderedDict
-import os.path
 import py_opc_n2_logger
 
+# Get progamme's arguments
+args = py_opc_n2_logger.catch_arguments()
 
 # Location of sensor
-usb_id = '/dev/ttyACM0'
-
-# Output directory
-directory_output = '~/Desktop/data'
-directory_output = os.path.expanduser(directory_output)
-
-# Create directory if needed
-py_opc_n2_logger.create_directory(directory_output)
-
+# usb_id = '/dev/ttyACM0'
 
 # Open connection to sensor
 print 'Opening the connection to the sensor...'
-spi = usbiss.USBISS(usb_id, 'spi', spi_mode = 2, freq = 500000)
+spi = usbiss.USBISS(args.device, 'spi', spi_mode = 2, freq = 500000)
 
 print 'Initializing the sensor...'
 time.sleep(0.5)
-alpha = opc.OPCN2(spi)
+sensor = opc.OPCN2(spi)
 
 print 'Sensor response...'
-print alpha
+print sensor
 
 print 'Turning the sensor on...'
 alpha.on()
 
 # Get serial number
 time.sleep(1)
-serial_number = alpha.sn().strip()
+serial_number = sensor.sn().strip()
 
 print 'Getting information...'
-print alpha.read_info_string()
+print sensor.read_info_string()
 
 # Other commands...
-# print alpha.config()
-# print alpha.read_firmware()
-
+# print sensor.config()
+# print sensor.read_firmware()
 
 print 'Waiting for the sensor to be ready...'
-time.sleep(2)
+time.sleep(1)
 
 # Set-up for measurement loop
 list_results = []
 
+
 # The measurement loop
 while True:
+  
+  if len(list_results) == 0 and py_opc_n2_logger.date_unix(integer = True) % 60 != 0:
+	
+    # Sleep until start of minute
+    py_opc_n2_logger.nice_starter(verbose = True)
+
+  else:
+  
+    # Do not wait
+    pass
 
   # Get measurement date
   date = time.time()
   
+  # Used for logging and other data export things but not logic
+  date_floor = floor()
+  
   # Make a date string
   date_string = datetime.datetime.fromtimestamp(
-    date,
-    pytz.timezone("UTC")
-  ).strftime("%Y-%m-%d %H:%M:%S.%f %Z")
+    date_floor,
+    pytz.timezone(args.time_zone)
+  ).strftime("%Y-%m-%d %H:%M:%S %Z")
   
   # Day string for files
   day_string = datetime.datetime.fromtimestamp(
@@ -76,12 +88,12 @@ while True:
   dict_extra = OrderedDict([
     ("sensor", serial_number), 
     ("date", date_string),
-    ("date_unix", date)
+    ("date_unix", date_floor)
   ])
   
   # Get sensor reponses
   # Get histogram response
-  dict_bins = alpha.histogram()
+  dict_bins = sensor.histogram()
   
   # Clean dictionary
   dict_bins = py_opc_n2_logger.clean_histogram_return(dict_bins)
@@ -90,7 +102,7 @@ while True:
   time.sleep(0.2)
   
   # Get particulate bins response
-  dict_pm = alpha.pm()
+  dict_pm = sensor.pm()
   
   # Lower case keys
   dict_pm = {k.lower(): v for k, v in dict_pm.items()}
@@ -110,12 +122,12 @@ while True:
   
   if len(list_results) == 60: 
     
-    print 'File writing...' 
+    print 'Exporting data...' 
     
     # File writing
     # Build file name
     file_output = ''.join(
-      [directory_output, "/", day_string, '_alphasense_opc_n2_data.csv']
+      [args.output, "/", day_string, '_alphasense_opc_n2_data.csv']
     )
     
     # Add header to file
@@ -124,7 +136,7 @@ while True:
       # Open and write
       with open(file_output, 'wb') as f:
         
-        print 'Writing header...' 
+        print 'Writing file header...' 
         w = csv.DictWriter(f, list_results[0].keys())
         w.writeheader()
         f.close()
@@ -144,7 +156,8 @@ while True:
     # Clear list for next measurement loop
     list_results = []
     
-    # Garbage collection needed every hour or so
+    # Garbage collection
+    py_opc_n2_logger.housekeeping()
     
   else: 
     
@@ -154,4 +167,4 @@ while True:
   py_opc_n2_logger.nice_waiter(1)
 
 # Shut down the sensor
-alpha.off()
+sensor.off()

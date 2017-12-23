@@ -40,7 +40,7 @@ dmesg | grep tty
 alphasense_opc_n2_logger
 ```
 
-  5. Use the `.csv` data files for something interesting 
+  5. Use the `.csv` data files for something interesting. 
   
 ## To-do 
  

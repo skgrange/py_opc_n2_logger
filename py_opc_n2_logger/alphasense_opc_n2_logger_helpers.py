@@ -4,7 +4,29 @@ import re
 from collections import OrderedDict
 import time, datetime, pytz
 from math import floor
+import argparse
+import gc
 
+
+# Function to sleep until the start of the next minute. 
+# 
+# Used for clean starting of log files.
+def nice_starter(verbose = True):
+  
+  # Get time
+  date_run = datetime.datetime.utcnow()
+  
+  # Get time to start
+  date_to_start = 60 - (date_run.second + date_run.microsecond / 1000000.0)
+  
+  if verbose:
+    
+    print "\nWaiting until the beginning of the next minute (" + \
+      str(int(date_to_start)) + " seconds) before starting logging..."
+    
+  # Sleep until future
+  time.sleep(date_to_start)
+  
 
 # Function to sleep until the next clean time period. 
 #
@@ -78,3 +100,74 @@ def create_directory(directory_output):
   
     pass
 
+
+def date_unix(integer = False):
+	
+  # Get date
+  date = time.time()
+
+  # Data type
+  if integer: 
+	  
+    date = floor(date)
+    date = int(date)
+    
+  else:
+	  
+    pass
+
+  return date
+
+
+def catch_arguments(): 
+  
+  # Command line arguments
+  parser = argparse.ArgumentParser()
+  
+  # The arguments
+  parser.add_argument(
+    '-o', 
+    '--output', 
+    default = '~/Desktop/data', 
+    help = 'Which directory should be used to export the programme\'s data files \
+    too?'
+  )
+  
+  parser.add_argument(
+    '-d', 
+    '--device', 
+    default = '/dev/ttyACM0', 
+    help = 'What is the device/location is the Alphasense OPC-N2 sensor?'
+  )
+  
+  parser.add_argument(
+    '-tz', 
+    '--time_zone', 
+    default = 'UTC',
+    help = "Which time zone will the date be stored in? As an Olison time-zone \
+    string. Epoch time is also stored so time-zone information can always be \
+    found from the data files."
+  )
+  
+  # Add arguments to object to be called in programme
+  args = parser.parse_args()
+  
+  # Modify file directory so ~ can be used  
+  args.output = os.path.expanduser(args.output)
+  
+  # If the output directory does not exist, create it
+  create_directory(args.output)
+  
+  return args
+ 
+ 
+def housekeeping():
+
+  # Garbage collection
+  if datetime.datetime.fromtimestamp(time.time()).minute % 15 == 0:
+  
+    gc.collect()
+	
+  else:
+  
+    pass  
