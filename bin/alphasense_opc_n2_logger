@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-A simple Python programme. 
+A Python programme to log data from an Alphasense OPC-N2 sensor. 
 
 Author Stuart K. Grange 
 '''
@@ -18,9 +18,6 @@ import py_opc_n2_logger
 # Get progamme's arguments
 args = py_opc_n2_logger.catch_arguments()
 
-# Location of sensor
-# usb_id = '/dev/ttyACM0'
-
 # Open connection to sensor
 print 'Opening the connection to the sensor...'
 spi = usbiss.USBISS(args.device, 'spi', spi_mode = 2, freq = 500000)
@@ -33,7 +30,7 @@ print 'Sensor response...'
 print sensor
 
 print 'Turning the sensor on...'
-alpha.on()
+sensor.on()
 
 # Get serial number
 time.sleep(1)
@@ -60,99 +57,35 @@ while True:
 	
     # Sleep until start of minute
     py_opc_n2_logger.nice_starter(verbose = True)
+    pass
 
   else:
   
     # Do not wait
     pass
 
-  # Get measurement date
-  date = time.time()
-  
-  # Used for logging and other data export things but not logic
-  date_floor = floor()
-  
-  # Make a date string
-  date_string = datetime.datetime.fromtimestamp(
-    date_floor,
-    pytz.timezone(args.time_zone)
-  ).strftime("%Y-%m-%d %H:%M:%S %Z")
-  
-  # Day string for files
-  day_string = datetime.datetime.fromtimestamp(
-    date,
-    pytz.timezone("UTC")
-  ).strftime("%Y-%m-%d")
-  
-  # Create an extra dictionary
-  dict_extra = OrderedDict([
-    ("sensor", serial_number), 
-    ("date", date_string),
-    ("date_unix", date_floor)
-  ])
-  
-  # Get sensor reponses
-  # Get histogram response
-  dict_bins = sensor.histogram()
-  
-  # Clean dictionary
-  dict_bins = py_opc_n2_logger.clean_histogram_return(dict_bins)
-  
-  # Sensor needs some time between querries to avoid errors
-  time.sleep(0.2)
-  
-  # Get particulate bins response
-  dict_pm = sensor.pm()
-  
-  # Lower case keys
-  dict_pm = {k.lower(): v for k, v in dict_pm.items()}
-  
-  # Bind dictonaries together
-  dict_bind = OrderedDict(
-    list(dict_extra.items()) + 
-    list(dict_pm.items()) + 
-    list(dict_bins.items())
+  # Interact with sensor
+  dict_bind = py_opc_n2_logger.get_measurements(
+    sensor = sensor,
+    time_zone = args.time_zone,
+    serial_number = serial_number
   )
-
+  
   # Print to console
-  print dict_bind
+  print dict_bind.get('date') + ': Sensor queried...'
+  # print dict_bind
   
   # Accumulate the measurements in the list
   list_results.extend([dict_bind])
   
-  if len(list_results) == 60: 
+  if len(list_results) == 12: 
+    
+    print 'Aggregating data...' 
+    df = py_opc_n2_logger.aggregate_measurements(list_results)
     
     print 'Exporting data...' 
+    py_opc_n2_logger.write_sensor_data(df, directory = args.output)
     
-    # File writing
-    # Build file name
-    file_output = ''.join(
-      [args.output, "/", day_string, '_alphasense_opc_n2_data.csv']
-    )
-    
-    # Add header to file
-    if not os.path.isfile(file_output): 
-      
-      # Open and write
-      with open(file_output, 'wb') as f:
-        
-        print 'Writing file header...' 
-        w = csv.DictWriter(f, list_results[0].keys())
-        w.writeheader()
-        f.close()
-      
-    else: 
-      
-      pass
-    
-    # Export data
-    with open(file_output, 'a') as f:
-      
-      # Open, write and close, writerows is needed for the list
-      w = csv.DictWriter(f, list_results[0].keys())
-      w.writerows(list_results)
-      f.close()
-      
     # Clear list for next measurement loop
     list_results = []
     
@@ -164,7 +97,7 @@ while True:
     pass
 
   # Sleep for next measurement iteration
-  py_opc_n2_logger.nice_waiter(1)
+  py_opc_n2_logger.nice_waiter(5)
 
 # Shut down the sensor
 sensor.off()

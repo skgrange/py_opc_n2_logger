@@ -6,6 +6,7 @@ import time, datetime, pytz
 from math import floor
 import argparse
 import gc
+import pandas as pd
 
 
 # Function to sleep until the start of the next minute. 
@@ -21,8 +22,8 @@ def nice_starter(verbose = True):
   
   if verbose:
     
-    print "\nWaiting until the beginning of the next minute (" + \
-      str(int(date_to_start)) + " seconds) before starting logging..."
+    print '\nWaiting until the beginning of the next minute (' + \
+      str(int(date_to_start)) + ' seconds) before starting logging...'
     
   # Sleep until future
   time.sleep(date_to_start)
@@ -56,8 +57,7 @@ def nice_waiter(frequency):
 
   seconds_to_wait = date_next - time.time()
   
-  # 
-  print seconds_to_wait
+  # print seconds_to_wait
   
   # Sleep until the clean time
   time.sleep(seconds_to_wait)
@@ -144,9 +144,9 @@ def catch_arguments():
     '-tz', 
     '--time_zone', 
     default = 'UTC',
-    help = "Which time zone will the date be stored in? As an Olison time-zone \
+    help = 'Which time zone will the date be stored in? As an Olison time-zone \
     string. Epoch time is also stored so time-zone information can always be \
-    found from the data files."
+    found from the data files.'
   )
   
   # Add arguments to object to be called in programme
@@ -171,3 +171,117 @@ def housekeeping():
   else:
   
     pass  
+
+
+def get_measurements(sensor, time_zone, serial_number): 
+  
+  # Get measurement date
+  date = time.time()
+  
+  # Used for logging and other data export things but not logic
+  date_floor = floor(date)
+  
+  # Make a date string
+  date_string = datetime.datetime.fromtimestamp(
+    date_floor,
+    pytz.timezone(time_zone)
+  ).strftime('%Y-%m-%d %H:%M:%S %Z')
+  
+  # Day string for files
+  day_string = datetime.datetime.fromtimestamp(
+    date,
+    pytz.timezone('UTC')
+  ).strftime('%Y-%m-%d')
+  
+  # Create an extra dictionary
+  dict_extra = OrderedDict([
+    ('sensor', serial_number), 
+    ('date', date_string),
+    ('date_unix', date_floor)
+  ])
+  
+  # Get sensor reponses
+  # Get histogram response
+  dict_bins = sensor.histogram()
+  
+  # Clean dictionary
+  dict_bins = clean_histogram_return(dict_bins)
+  
+  # Sensor needs some time between querries to avoid errors
+  time.sleep(0.2)
+  
+  # Get particulate bins response
+  dict_pm = sensor.pm()
+  
+  # Lower case keys
+  dict_pm = {k.lower(): v for k, v in dict_pm.items()}
+  
+  # Bind dictonaries together
+  dict_bind = OrderedDict(
+    list(dict_extra.items()) + 
+    list(dict_pm.items()) + 
+    list(dict_bins.items())
+  )
+  
+  return(dict_bind)
+
+
+
+def aggregate_measurements(list_results, round = True):
+  
+  # To data frame  
+  df = pd.DataFrame(list_results)
+  
+  # Force data types, missing data really here
+  df['temperature'] = df['temperature'].astype(float)
+  df['pressure'] = df['pressure'].astype(float)
+  
+  # Aggregate by sensor
+  df_group = df.groupby(by = 'sensor')
+  df_group = df_group.mean()
+  
+  # Round numeric variables
+  if round:
+  
+    df_group = df_group.round(decimals = 3)
+	
+  else: 
+  
+    pass
+  
+  # Overwrite some variables
+  # First observation for minute
+  df_group['date'] = df.date[0]
+  df_group['date_unix'] = df.date_unix[0]
+  df_group['checksum'] = df.checksum[0]
+  
+  # Duplicated data, but easier
+  df_group['sensor'] = df.sensor[0]
+  
+  # Order variables
+  df_group = df_group[list_results[0].keys()]
+  
+  return(df_group)
+
+
+# Function to write data frame to disk
+def write_sensor_data(df, directory):
+
+  # Create file name
+  file_name = df.date[0].split(' ')[0] + '_alphasense_opc_n2_data.csv'
+  
+  # Add directory
+  file_name = os.path.join(directory, file_name)
+  
+  # File writer
+  if not os.path.isfile(file_name): 
+    
+    # If file does not exist, create and add header
+    df.to_csv(file_name, index = False)
+    
+  else: 
+    
+    # If file exists, append and do not write header
+    df.to_csv(file_name, index = False, mode = 'a', header = False)
+    
+  # No return
