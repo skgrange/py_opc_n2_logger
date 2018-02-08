@@ -36,7 +36,7 @@ sensor.on()
 time.sleep(1)
 serial_number = sensor.sn().strip()
 
-print 'Getting information...'
+print 'Getting sensor information...'
 print sensor.read_info_string()
 
 # Other commands...
@@ -57,7 +57,6 @@ while True:
 	
     # Sleep until start of minute
     py_opc_n2_logger.nice_starter(verbose = True)
-    pass
 
   else:
   
@@ -73,9 +72,8 @@ while True:
   
   # Print to console
   print dict_bind.get('date') + ': Sensor queried...'
-  # print dict_bind
   
-  # Accumulate the measurements in the list
+  # Accumulate the measurements
   list_results.extend([dict_bind])
   
   if len(list_results) == 12: 
