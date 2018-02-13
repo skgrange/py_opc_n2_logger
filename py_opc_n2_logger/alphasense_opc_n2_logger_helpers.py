@@ -57,8 +57,6 @@ def nice_waiter(frequency):
 
   seconds_to_wait = date_next - time.time()
   
-  # print seconds_to_wait
-  
   # Sleep until the clean time
   time.sleep(seconds_to_wait)
 
@@ -163,7 +161,7 @@ def catch_arguments():
  
 def housekeeping():
 
-  # Garbage collection
+  # Garbage collection, once an hour
   if datetime.datetime.fromtimestamp(time.time()).minute % 15 == 0:
   
     gc.collect()
@@ -253,6 +251,8 @@ def aggregate_measurements(list_results, round = True):
   # First observation for minute
   df_group['date'] = df.date[0]
   df_group['date_unix'] = df.date_unix[0]
+  
+  # Nonsense here, but same logic as dates
   df_group['checksum'] = df.checksum[0]
   
   # Duplicated data, but easier

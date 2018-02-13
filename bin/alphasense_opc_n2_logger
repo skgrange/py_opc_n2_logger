@@ -15,7 +15,7 @@ import csv
 from collections import OrderedDict
 import py_opc_n2_logger
 
-# Get progamme's arguments
+# Catch progamme's arguments
 args = py_opc_n2_logger.catch_arguments()
 
 # Open connection to sensor
@@ -46,13 +46,14 @@ print sensor.read_info_string()
 print 'Waiting for the sensor to be ready...'
 time.sleep(1)
 
-# Set-up for measurement loop
-list_results = []
 
+# Allocatefor measurement loop
+list_results = []
 
 # The measurement loop
 while True:
   
+  # Start logging at the start of the minute
   if len(list_results) == 0 and py_opc_n2_logger.date_unix(integer = True) % 60 != 0:
 	
     # Sleep until start of minute
@@ -63,7 +64,7 @@ while True:
     # Do not wait
     pass
 
-  # Interact with sensor
+  # Interact with sensor, query and get measurements
   dict_bind = py_opc_n2_logger.get_measurements(
     sensor = sensor,
     time_zone = args.time_zone,
@@ -76,6 +77,7 @@ while True:
   # Accumulate the measurements
   list_results.extend([dict_bind])
   
+  # Aggregation and file writing logic
   if len(list_results) == 12: 
     
     print 'Aggregating data...' 
@@ -97,5 +99,5 @@ while True:
   # Sleep for next measurement iteration
   py_opc_n2_logger.nice_waiter(5)
 
-# Shut down the sensor
+# Shut down the sensor, may not ever be used...
 sensor.off()

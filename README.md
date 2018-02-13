@@ -2,7 +2,7 @@
 
 **pylogger_opc_n2** is a data logging package for the [Alphasense's OPC-N2](http://www.alphasense.com/index.php/products/optical-particle-counter/) particle sensor. It is built upon [**py-opc**](http://py-opc.readthedocs.io) and [**pyusbiss**](https://github.com/DancingQuanta/pyusbiss). **pylogger_opc_n2** interacts with the sensor with the USB interface via **pyusbiss** and works well on a Raspberry Pi running a Debian-based Linux distribution. 
 
-By default, the programme assumes the sensor is located at `/dev/ttyACM0`, will query the sensor every five seconds and aggregate every minute, and will use the `~/Desktop/data` as the directory to save observations. 
+By default, the programme assumes the sensor is located at `/dev/ttyACM0`, will query the sensor every five seconds and aggregate every minute, and will use the `~/Desktop/data` as the directory to save observations. The data files have been designed for clarity and ease of use and are suitable for further analyses. 
 
 ## Installation
 
@@ -15,6 +15,8 @@ pip install git+https://github.com/DancingQuanta/pyusbiss
 # Install pylogger_opc_n2
 pip install git+https://github.com/skgrange/py_opc_n2_logger
 ```
+
+If installing on a Raspberry Pi, the installation of Pandas is very slow due to the compilation. You can drop the pandas entry in `setup.py` if pandas is already installed to speed things up. 
 
 ## Set-up
 
@@ -40,14 +42,14 @@ dmesg | grep tty
   6. Run the logging programme: 
   
 ```
-# Start logging data from the sensor, installed as a system programme
+# Start logging data from the sensor, it is installed as a system programme
 alphasense_opc_n2_logger
 ```
 
-The programme arguments allow for the device/location, the output directory of the data files, and the time zone used for the data files to be specified. Run `alphasense_opc_n2_logger --help` to find some help information. 
+The programme arguments allow for the device/location such as `ttyACM0`, the output directory of the data files (the default is `~/Desktop/data`), and the time zone used for the data files to be specified (the default is "UTC"). Run `alphasense_opc_n2_logger --help` to find some help information about these arguments. 
 
   7. Use the `.csv` data files for something interesting. 
 
 ## To-do 
 
-   - Sensor query frequency
+   - Allow for different sensor query frequency and aggregation periods.
