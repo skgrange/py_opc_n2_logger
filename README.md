@@ -53,3 +53,5 @@ The programme arguments allow for the device/location such as `ttyACM0`, the out
 ## To-do 
 
    - Allow for different sensor query frequency and aggregation periods.
+   
+   - Drop Pandas as a dependency. The install of Pandas takes far too long on Raspberry Pi computers. 
