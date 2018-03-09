@@ -37,9 +37,9 @@ dmesg | grep tty
 # sudo adduser user_name dialout
 ```
 
-  5. Wait for a minute or so after the sensor's fan starts to operate. If the sensor is attempted to be queried before it is ready, it will not respond. 
+  4. Wait for a minute or so after the sensor's fan starts to operate. If the sensor is attempted to be queried before it is ready, it will not respond. 
 
-  6. Run the logging programme: 
+  5. Run the logging programme: 
   
 ```
 # Start logging data from the sensor, it is installed as a system programme
@@ -48,7 +48,7 @@ alphasense_opc_n2_logger
 
 The programme arguments allow for the device/location such as `ttyACM0`, the output directory of the data files (the default is `~/Desktop/data`), and the time zone used for the data files to be specified (the default is "UTC"). Run `alphasense_opc_n2_logger --help` to find some help information about these arguments. 
 
-  7. Use the `.csv` data files for something interesting. 
+  6. Use the `.csv` data files for something interesting. 
 
 ## To-do 
 
