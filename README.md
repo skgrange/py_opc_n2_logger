@@ -18,6 +18,8 @@ pip install git+https://github.com/skgrange/py_opc_n2_logger
 
 If installing on a Raspberry Pi, the installation of Pandas is very slow due to the compilation. You can drop the pandas entry in `setup.py` if pandas is already installed to speed things up. 
 
+If you encounter issues, ensure that your system repositories are up to date with `sudo apt get update` and if the `python-dev` development packages are missing, install them with `sudo apt install python-dev`. 
+
 ## Set-up
 
   1. Install the packages. 
@@ -54,4 +56,4 @@ The programme arguments allow for the device/location such as `ttyACM0`, the out
 
    - Allow for different sensor query frequency and aggregation periods.
    
-   - Drop Pandas as a dependency. The install of Pandas takes far too long on Raspberry Pi computers. 
+   - Drop Pandas as a dependency. The install of Pandas takes far too long on Raspberry Pi computers to compile and install. 
