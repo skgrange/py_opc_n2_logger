@@ -8,7 +8,7 @@ Author Stuart K. Grange
 '''
 
 # Load packages
-import usbiss
+from usbiss.usbiss import USBISS
 import opc
 import time, datetime, pytz
 import csv
@@ -20,7 +20,7 @@ args = py_opc_n2_logger.catch_arguments()
 
 # Open connection to sensor
 print 'Opening the connection to the sensor...'
-spi = usbiss.USBISS(args.device, 'spi', spi_mode = 2, freq = 500000)
+spi = USBISS(args.device, 'spi', spi_mode = 2, freq = 500000)
 
 print 'Initializing the sensor...'
 time.sleep(0.5)
