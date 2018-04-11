@@ -4,6 +4,8 @@
 
 This package is now deprecated. The dependencies have been updated and these programmes need to be enhanced to handle these changes. I do not have the hardware at the moment to do this development so this package will not be useful. 
 
+## Introduction
+
 **pylogger_opc_n2** is a data logging package for the [Alphasense's OPC-N2](http://www.alphasense.com/index.php/products/optical-particle-counter/) particle sensor. It is built upon [**py-opc**](http://py-opc.readthedocs.io) and [**pyusbiss**](https://github.com/DancingQuanta/pyusbiss). **pylogger_opc_n2** interacts with the sensor with the USB interface via **pyusbiss** and works well on a Raspberry Pi running a Debian-based Linux distribution. 
 
 By default, the programme assumes the sensor is located at `/dev/ttyACM0`, will query the sensor every five seconds and aggregate every minute, and will use the `~/Desktop/data` as the directory to save observations. The data files have been designed for clarity and ease of use and are suitable for further analyses. 
