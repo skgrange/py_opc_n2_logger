@@ -2,7 +2,7 @@
 
 ## Please note
 
-This package is now deprecated. The dependencies have been updated and these programmes need to be enhanced to handle these changes. I do not have the hardware at the moment to do this development so this package will not be useful. 
+This package is now *deprecated*. The dependencies have been updated and these programmes need to be enhanced to handle these changes. I do not have the hardware at the moment to do this development so this package will not be useful. 
 
 ## Introduction
 
