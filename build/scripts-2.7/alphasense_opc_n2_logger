@@ -78,17 +78,13 @@ while True:
   list_results.extend([dict_bind])
   
   # Aggregation and file writing logic
-  if len(list_results) == 12: 
+  if len(list_results) == 6: 
     
     print 'Aggregating data...' 
     df = py_opc_n2_logger.aggregate_measurements(list_results)
     
     print 'Exporting data...' 
     py_opc_n2_logger.write_sensor_data(df, directory = args.output)
-    
-    # Print some concentration data 
-    print 'PM10 mean: ' + str(round(df['pm10'], 1)) + '...'
-    print 'PM2.5 mean: ' + str(round(df['pm2.5'], 1)) + '...'
     
     # Clear list for next measurement loop
     list_results = []
@@ -101,7 +97,7 @@ while True:
     pass
 
   # Sleep for next measurement iteration
-  py_opc_n2_logger.nice_waiter(5)
+  py_opc_n2_logger.nice_waiter(10)
 
 # Shut down the sensor, may not ever be used...
 sensor.off()

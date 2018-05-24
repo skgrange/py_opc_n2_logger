@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
   name = 'py_opc_n2_logger',
-  version = '0.1.5s',
+  version = '0.1.6999',
   description = 'A Python data logging package for the Alphasense OPC-N2 particle sensor',
   url = 'http://github.com/skgrange/py_opc_n2_logger',
   author = 'Stuart K. Grange',

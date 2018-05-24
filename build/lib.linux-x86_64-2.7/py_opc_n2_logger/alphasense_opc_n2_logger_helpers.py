@@ -225,7 +225,7 @@ def get_measurements(sensor, time_zone, serial_number):
 
 
 
-def aggregate_measurements(list_results, round = False):
+def aggregate_measurements(list_results, round = True):
   
   # To data frame  
   df = pd.DataFrame(list_results)
@@ -239,7 +239,6 @@ def aggregate_measurements(list_results, round = False):
   df_group = df_group.mean()
   
   # Round numeric variables
-  # To-do: do differently, fails on older pandas versions?
   if round:
   
     df_group = df_group.round(decimals = 3)
